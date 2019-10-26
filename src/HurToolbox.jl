@@ -2,7 +2,8 @@ module HurToolbox
 
 # greet() = print("Hello World!")
 
-export	@HurDefineRF,
+export	n,n1,n2,n3,t,
+		@HurDefineRF,
 		@HurDefineGeneralizedCoordinates,
 		HurGetIndexGlobalRF,
 		HurFindIndex,
