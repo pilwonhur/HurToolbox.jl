@@ -12,15 +12,15 @@ end
 
 using LinearAlgebra, SymPy
 
-global n=Sym("n")
-global n1=Sym("n1")
-global n2=Sym("n2")
-global n3=Sym("n3")
-global t=Sym("t")
+# global n=Sym("n")
+# global n1=Sym("n1")
+# global n2=Sym("n2")
+# global n3=Sym("n3")
+# global t=Sym("t")
 
-export	n,n1,n2,n3,t,
-		@HurDefineRF,
+export	@HurDefineRF,
 		@HurDefineGeneralizedCoordinates,
+		@HurDefineTime,
 		HurGetIndexGlobalRF,
 		HurFindIndex,
 		HurTranspose,
