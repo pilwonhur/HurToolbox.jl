@@ -28,7 +28,7 @@ macro HurDefineTime(x) # ... is the way to handle tuples in the argument.
 	tmp=Expr(:block)
 
 	push!(tmp.args,:($(esc(x))=$(esc(symbols(x))) ))
-	push!(tmp.args, :($(esc(HurGlobalTime))=$(esc(x)) ))
+	# push!(tmp.args, :($(esc(HurGlobalTime))=$(esc(x)) ))
 
 	# push!(tmp.args, :(print(length($(esc(HurGlobalRF))))  ))
 	return tmp;
@@ -46,7 +46,7 @@ macro HurDefineRF(x...) # ... is the way to handle tuples in the argument.
 			global HurGlobalDCM=vcat(HurGlobalDCM,[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0])
 
 			global HurGlobalListTriads=vcat(HurGlobalListTriads,[n1 n2 n3])
-			n,=size(HurGlobalListTriads)
+			n,=size(HurGlobalRF)
 			for i=1:3
 				tempp=string(xx)*string(i)
 				temp=Symbol(tempp)
