@@ -46,12 +46,12 @@ macro HurDefineRF(x...) # ... is the way to handle tuples in the argument.
 			global HurGlobalDCM=vcat(HurGlobalDCM,[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0])
 
 			global HurGlobalListTriads=vcat(HurGlobalListTriads,[n1 n2 n3])
-			n,=size(HurGlobalRF)
+			n,=size(HurGlobalListTriads)
 			for i=1:3
 				tempp=string(xx)*string(i)
 				temp=Symbol(tempp)
 				push!(tmp.args,:($(esc(temp))=$(esc(symbols(temp)))))
-				HurGlobalListTriads[n,i]=Sym(tempp)
+				HurGlobalListTriads[n-1,i]=Sym(tempp)
 			end
 		end
 	end
