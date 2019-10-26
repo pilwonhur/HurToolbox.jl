@@ -6,7 +6,7 @@ HurGlobalTriadsConversion = Array{Pair{Sym,Sym}}(undef,0,0)
 HurGlobalDCM = Array{Sym}(undef,1,9)
 
 # push!(HurGlobalRF,n)
-# HurGlobalListTriads[1,:]=[n1 n2 n3]
+HurGlobalListTriads[1,:]=[n1 n2 n3]
 # HurGlobalTriadsConversion=[n1=>n1 n2=>n2 n3=>n3]
 HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
 
