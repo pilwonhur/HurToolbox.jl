@@ -3,6 +3,15 @@ module HurToolbox
 # greet() = print("Hello World!")
 
 # @vars n n1 n2 n3 t
+
+using Pkg
+l = ["LinearAlgebra","SymPy"]
+for item in l
+    Pkg.add(item)
+end
+
+using LinearAlgebra, SymPy
+
 global n=Sym("n")
 global n1=Sym("n1")
 global n2=Sym("n2")
@@ -25,14 +34,6 @@ export	n,n1,n2,n3,t,
 		HurUnifyTriadPool,
 		HurUnifyTriads,
 		HurGetRelativeDCM
-
-using Pkg
-l = ["LinearAlgebra","SymPy"]
-for item in l
-    Pkg.add(item)
-end
-
-using LinearAlgebra, SymPy
 
 include("API.jl")
 
