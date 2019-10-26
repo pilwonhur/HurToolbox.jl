@@ -1,6 +1,3 @@
-@vars n n1 n2 n3 t
-
-
 HurGlobalRF = Array{Sym}(undef,0)
 HurGlobalGeneralizedCoordinates = Array{SymFunction}(undef,0)
 HurGlobalListTriads = Array{Sym}(undef,1,3)
