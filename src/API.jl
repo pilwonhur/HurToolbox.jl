@@ -5,7 +5,7 @@ HurGlobalListTriads = Array{Sym}(undef,1,3)
 HurGlobalTriadsConversion = Array{Pair{Sym,Sym}}(undef,0,0)
 HurGlobalDCM = Array{Sym}(undef,1,9)
 
-push!(HurGlobalRF,n)
+# push!(HurGlobalRF,n)
 # HurGlobalListTriads[1,:]=[n1 n2 n3]
 # HurGlobalTriadsConversion=[n1=>n1 n2=>n2 n3=>n3]
 HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
@@ -23,10 +23,6 @@ HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
 
 # p=n1+n2+n3
 # p(HurGlobalTriadsConversion[2,1],HurGlobalTriadsConversion[2,2],HurGlobalTriadsConversion[2,3])
-
-macro test3(v)
-       :($(esc(v))=$(esc(symbols(v))))
-       end
 
 macro HurDefineTime(x) # ... is the way to handle tuples in the argument.
 	tmp=Expr(:block)

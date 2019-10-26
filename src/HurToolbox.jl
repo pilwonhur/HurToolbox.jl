@@ -12,11 +12,7 @@ end
 
 using LinearAlgebra, SymPy
 
-# global n=Sym("n")
-# global n1=Sym("n1")
-# global n2=Sym("n2")
-# global n3=Sym("n3")
-# global t=Sym("t")
+@vars n n1 n2 n3
 
 export	@HurDefineRF,
 		@HurDefineGeneralizedCoordinates,
