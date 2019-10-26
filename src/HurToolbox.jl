@@ -12,7 +12,7 @@ end
 
 using LinearAlgebra, SymPy
 
-@vars n n1 n2 n3
+@vars n n1 n2 n3 t
 
 export	@HurDefineRF,
 		@HurDefineGeneralizedCoordinates,
