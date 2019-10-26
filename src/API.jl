@@ -26,7 +26,7 @@ HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
 # p(HurGlobalTriadsConversion[2,1],HurGlobalTriadsConversion[2,2],HurGlobalTriadsConversion[2,3])
 
 macro HurDefineTime(x) # ... is the way to handle tuples in the argument.
-	# tmp=Expr(:block)
+	tmp=Expr(:block)
 
 	push!(tmp.args,:($(esc(x))=$(esc(symbols(x))) ))
 	# :($(esc(x))=$(esc(symbols(x))))
@@ -34,7 +34,7 @@ macro HurDefineTime(x) # ... is the way to handle tuples in the argument.
 	# HurGlobalTime=Sym(string(x))
 
 	# push!(tmp.args, :(print(length($(esc(HurGlobalRF))))  ))
-	# return tmp;
+	return tmp;
 end
 
 macro HurDefineRF(x...) # ... is the way to handle tuples in the argument.
