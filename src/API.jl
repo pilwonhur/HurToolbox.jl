@@ -46,6 +46,7 @@ macro HurDefineRF(x...) # ... is the way to handle tuples in the argument.
 			push!(tmp.args, :(push!($(esc(HurGlobalRF)),$(esc(xx))))  )
 			
 			global HurGlobalDCM=vcat(HurGlobalDCM,[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0])
+			HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
 
 			global HurGlobalListTriads=vcat(HurGlobalListTriads,[n1 n2 n3])
 			n,=size(HurGlobalListTriads)
