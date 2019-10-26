@@ -179,8 +179,8 @@ function HurUnifyTriads(v,rf)
 end
 
 function HurGetRelativeDCM(rf1,rf2)
-	rot1=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1)])
-	rot2=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2)])
+	rot1=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1),:])
+	rot2=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:])
 	r=HurTranspose(rot2)*rot1;
 	return [simplify(r[1,1]) simplify(r[1,2]) simplify(r[1,3]);simplify(r[2,1]) simplify(r[2,2]) simplify(r[2,3]);simplify(r[3,1]) simplify(r[3,2]) simplify(r[3,3]);]
 end
