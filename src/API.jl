@@ -29,11 +29,8 @@ macro HurDefineTime(x) # ... is the way to handle tuples in the argument.
 	tmp=Expr(:block)
 
 	push!(tmp.args,:($(esc(x))=$(esc(symbols(x))) ))
-	# :($(esc(x))=$(esc(symbols(x))))
-	push!(tmp.args, :($(esc(HurGlobalTime))=$(esc(Sym(x))) ))
-	# HurGlobalTime=Sym(string(x))
-
-	# push!(tmp.args, :(print(length($(esc(HurGlobalRF))))  ))
+	push!(tmp.args,:($(esc(HurGlobalTime))=$(esc(Sym(x))) ))
+	HurGlobalTime=Sym(string(x))
 	return tmp;
 end
 
