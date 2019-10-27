@@ -166,20 +166,20 @@ function HurConstructTriadsConversion()
 			HurGlobalTriadsConversion[i,3*(j-1)+3]=HurGlobalListTriads[j,3]=>tmpTriads[3];
 		end
 	end
-	m,=size(HurGlobalListTriads)
-	if m>n
-		HurGlobalListTriads=HurGlobalListTriads[setdiff(1:end,m),:]
-	end
+	# m,=size(HurGlobalListTriads)
+	# if m>n
+	# 	HurGlobalListTriads=HurGlobalListTriads[setdiff(1:end,m),:]
+	# end
 
-	m,=size(HurGlobalDCM)
-	if m>n
-		HurGlobalDCM=HurGlobalDCM[setdiff(1:end,m),:]
-	end
+	# m,=size(HurGlobalDCM)
+	# if m>n
+	# 	HurGlobalDCM=HurGlobalDCM[setdiff(1:end,m),:]
+	# end
 
-	m,=size(HurGlobalAngularVel)
-	if m>n
-		HurGlobalAngularVel=HurGlobalAngularVel[setdiff(1:end,m)]
-	end
+	# m,=size(HurGlobalAngularVel)
+	# if m>n
+	# 	HurGlobalAngularVel=HurGlobalAngularVel[setdiff(1:end,m)]
+	# end
 end
 
 function HurRotationMatrix(ang,dir)
