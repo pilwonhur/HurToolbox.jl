@@ -152,6 +152,7 @@ end
 function HurConstructTriadsConversion()
 	n=length(HurGlobalRF);
 	global HurGlobalTriadsConversion=Array{Pair{Sym,Sym}}(undef,n,n*3);
+	global HurGlobalListTriads
 	
 	for i=1:n
 		for j=1:n
