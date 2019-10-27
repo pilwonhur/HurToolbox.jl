@@ -153,7 +153,9 @@ function HurConstructTriadsConversion()
 	n=length(HurGlobalRF);
 	global HurGlobalTriadsConversion=Array{Pair{Sym,Sym}}(undef,n,n*3);
 	global HurGlobalListTriads
-	
+	global HurGlobalDCM
+	global HurGlobalAngularVel
+
 	for i=1:n
 		for j=1:n
 			Rot=HurUnifyTriadPool(HurGlobalRF[i], HurGlobalRF[j]);
@@ -287,7 +289,7 @@ function HurAppendRF2Coord(coord, rf)
 end
 
 function HurVectorDiff(v,rf1,rf2)
-	df2dvdt=diff(HurUnifyTriadsCoord[1:3],HurGlobalTime)
+	df2dvdt=diff(HurUnifyTriadsCoord(v,rf2)[1:3],HurGlobalTime)
 	www=HurUnifyTriads(HurGetAngularVel(rf2,rf2)-HurGetAngularVel(rf1,rf2),rf2);
 	wcrossv=HurCrossCoord(www,v,rf2);
 	df1dvdt=df2dvdt+wcrossv[1:3];
