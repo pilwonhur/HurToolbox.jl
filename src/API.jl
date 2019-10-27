@@ -262,7 +262,7 @@ function HurSimplify(mat)	# for testing only
 end
 
 function HurGetAngularVel(rf1,rf2)
-	rot5=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1)]);
+	rot5=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]);
 	Sw=HurDiff(rot5, HurGlobalTime)*HurTranspose(rot5);
 	ww=(-Sw[2,3])*HurGlobalListTriads[1,1]+(Sw[1,3])*HurGlobalListTriads[1,2]+(-Sw[1,2])*HurGlobalListTriads[1,3];
 	ww=HurSimplify(ww);
