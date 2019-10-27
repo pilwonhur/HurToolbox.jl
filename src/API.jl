@@ -245,7 +245,12 @@ function HurDiff(mat,var)	# for testing only
 	matp=copy(mat)
 	n=length(mat)
 	for i=1:n
-		matp[i]=diff(mat[i],var)
+		if n==1
+			matp=diff(mat,var)
+		else
+			matp[i]=diff(mat[i],var)
+		end
+		
 	end
 	return matp
 end
@@ -255,7 +260,11 @@ function HurSimplify(mat)	# for testing only
 	n=length(mat)
 	for i=1:n
 		if typeof(mat[i]) == Sym
-			matp[i]=simplify(mat[i])
+			if n==1
+				matp=simplify(mat)
+			else
+				matp[i]=simplify(mat[i])
+			end
 		end
 	end
 	return matp
