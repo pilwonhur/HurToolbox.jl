@@ -1,4 +1,4 @@
-HurGlobalTime = Sym(undef)
+HurGlobalTime = Array{Sym}(undef,1)
 HurGlobalRF = Array{Sym}(undef,0)
 HurGlobalGeneralizedCoordinates = Array{SymFunction}(undef,0)
 HurGlobalListTriads = Array{Sym}(undef,1,3)
@@ -7,7 +7,7 @@ HurGlobalDCM = Array{Sym}(undef,1,9)
 
 # push!(HurGlobalRF,n)
 HurGlobalListTriads[1,:]=[n1 n2 n3]
-HurGlobalTime=t
+HurGlobalTime[1]=t
 # HurGlobalTriadsConversion=[n1=>n1 n2=>n2 n3=>n3]
 HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
 
@@ -30,7 +30,8 @@ macro HurDefineTime(x) # ... is the way to handle tuples in the argument.
 
 	push!(tmp.args,:($(esc(x))=$(esc(symbols(x))) ))
 	# push!(tmp.args,:($(esc(HurGlobalTime))=$(esc(Sym(x))) ))
-	HurGlobalTime=Sym(string(x))
+	push!(tmp.args, :(push!($(esc(HurGlobalTime)),$(esc(x))))  )
+	# HurGlobalTime=Sym(string(x))
 	return tmp;
 end
 
