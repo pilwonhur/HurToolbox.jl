@@ -38,7 +38,10 @@ export	@HurDefineRF,
 		HurGetAngularVel,
 		HurSimplify,
 		HurDiff,
-		HurUnifyTriadsCoord
+		HurUnifyTriadsCoord,
+		HurMatrixVectorProduct,
+		HurDot,
+		HurSetSimplify
 
 include("API.jl")
 

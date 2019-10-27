@@ -35,6 +35,7 @@ HurGlobalListTriads = Array{Sym}(undef,1,3)
 HurGlobalTriadsConversion = Array{Pair{Sym,Sym}}(undef,0,0)
 HurGlobalDCM = Array{Sym}(undef,1,9)
 HurGlobalAngularVel=Array{Sym}(undef,1)
+HurGlobalSimplify = false
 
 # push!(HurGlobalRF,n)
 HurGlobalListTriads[1,:]=[n1 n2 n3];
@@ -146,7 +147,13 @@ end
 
 function HurDefineDCMRelative(rf1, rf2, dcm)
 	rot=HurMatrix2Row(HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:])*dcm);
-	HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]=[simplify(rot[1]) simplify(rot[2]) simplify(rot[3]) simplify(rot[4]) simplify(rot[5]) simplify(rot[6]) simplify(rot[7]) simplify(rot[8]) simplify(rot[9])];
+
+
+	if HurGlobalSimplify
+		HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]=[simplify(rot[1]) simplify(rot[2]) simplify(rot[3]) simplify(rot[4]) simplify(rot[5]) simplify(rot[6]) simplify(rot[7]) simplify(rot[8]) simplify(rot[9])];
+	else
+		HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]=[rot[1] rot[2] rot[3] rot[4] rot[5] rot[6] rot[7] rot[8] rot[9]];
+	end
 end
 
 function HurConstructTriadsConversion()
@@ -238,7 +245,11 @@ function HurGetRelativeDCM(rf1,rf2)
 	rot1=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]);
 	rot2=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:]);
 	r=HurTranspose(rot2)*rot1;
-	return [simplify(r[1,1]) simplify(r[1,2]) simplify(r[1,3]);simplify(r[2,1]) simplify(r[2,2]) simplify(r[2,3]);simplify(r[3,1]) simplify(r[3,2]) simplify(r[3,3])];
+	if HurGlobalSimplify
+		return [simplify(r[1,1]) simplify(r[1,2]) simplify(r[1,3]);simplify(r[2,1]) simplify(r[2,2]) simplify(r[2,3]);simplify(r[3,1]) simplify(r[3,2]) simplify(r[3,3])];
+	else
+		return [r[1,1] r[1,2] r[1,3];r[2,1] r[2,2] r[2,3];r[3,1] r[3,2] r[3,3]];
+	end
 end
 
 function HurDiff(mat,var)	# for testing only
@@ -257,13 +268,15 @@ end
 
 function HurSimplify(mat)	# for testing only
 	matp=copy(mat)
-	n=length(mat)
-	for i=1:n
-		if typeof(mat[i]) == Sym
-			if n==1
-				matp=simplify(mat)
-			else
-				matp[i]=simplify(mat[i])
+	if HurGlobalSimplify
+		n=length(mat)
+		for i=1:n
+			if typeof(mat[i]) == Sym
+				if n==1
+					matp=simplify(mat)
+				else
+					matp[i]=simplify(mat[i])
+				end
 			end
 		end
 	end
@@ -314,3 +327,25 @@ function HurCoordTriads(v...)
 	end
 	return vec;
 end
+
+function HurMatrixVectorProduct(mat,vec,rf) 
+    return mat*HurUnifyTriadsCoord(vec,rf)[1:3]
+end
+
+function HurMatrixVectorProductTriads(mat,vec,rf) 
+    return HurCoordTriads(HurMatrixVectorProduct(mat,vec,rf),rf)
+end
+
+function HurDot(v1, v2)
+	tempD=sum(HurUnifyTriadsCoord(v1, HurGlobalRF[1])[1:3].*HurUnifyTriadsCoord(v2, HurGlobalRF[1])[1:3]);
+	if HurGlobalSimplify
+		return simplify(tempD)
+	else
+		return tempD
+	end
+end
+
+function HurSetSimplify(flag)
+	global HurGlobalSimplify=flag
+end
+
