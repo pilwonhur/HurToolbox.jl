@@ -30,7 +30,15 @@ export	@HurDefineRF,
 		HurUnifyTriadPool,
 		HurUnifyTriads,
 		HurGetRelativeDCM,
-		HurDiff
+		HurCoordTriads,
+		HurVectorDiff,
+		HurAppendRF2Coord,
+		HurCrossCoord,
+		HurSetAngularVel,
+		HurGetAngularVel,
+		HurSimplify,
+		HurDiff,
+		HurUnifyTriadsCoord
 
 include("API.jl")
 

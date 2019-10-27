@@ -10,8 +10,10 @@
 
 #=
 Version History
-v0.2
-
+v0.2 (10/26/2019)
+The following were added.
+HurVectorDiff,HurAppendRF2Coord,HurCrossCoord,HurSetAngularVel,HurGetAngularVel,
+HurSimplify,HurDiff,HurUnifyTriadsCoord
 
 v0.1 (10/26/2019)
 Basic implementation of definitions of RF, GC, time, DCM, Conversion between triads.
@@ -32,13 +34,14 @@ HurGlobalGeneralizedCoordinates = Array{SymFunction}(undef,0)
 HurGlobalListTriads = Array{Sym}(undef,1,3)
 HurGlobalTriadsConversion = Array{Pair{Sym,Sym}}(undef,0,0)
 HurGlobalDCM = Array{Sym}(undef,1,9)
+HurGlobalAngularVel=Array{Sym}(undef,1)
 
 # push!(HurGlobalRF,n)
-HurGlobalListTriads[1,:]=[n1 n2 n3]
-HurGlobalTime=t
+HurGlobalListTriads[1,:]=[n1 n2 n3];
+HurGlobalTime=t;
 # HurGlobalTriadsConversion=[n1=>n1 n2=>n2 n3=>n3]
-HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
-
+HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0];
+HurGlobalAngularVel[1]=0;
 
 # HurGlobalListTriads=vcat(HurGlobalListTriads,[n1 n2 n3])
 
@@ -54,12 +57,12 @@ HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
 # p(HurGlobalTriadsConversion[2,1],HurGlobalTriadsConversion[2,2],HurGlobalTriadsConversion[2,3])
 
 macro HurDefineTime(x) # ... is the way to handle tuples in the argument.
-	tmp=Expr(:block)
+	tmp=Expr(:block);
 
-	push!(tmp.args,:($(esc(x))=$(esc(symbols(x))) ))
+	push!(tmp.args,:($(esc(x))=$(esc(symbols(x))) ));
 	# push!(tmp.args,:($(esc(HurGlobalTime))=$(esc(Sym(x))) ))
 	# push!(tmp.args, :(push!($(esc(HurGlobalTime)),$(esc(x))))  )
-	global HurGlobalTime=Sym(string(x))
+	global HurGlobalTime=Sym(string(x));
 	return tmp;
 end
 
@@ -69,19 +72,21 @@ macro HurDefineRF(x...) # ... is the way to handle tuples in the argument.
 		# avoid redefinition of RFs
 		ind=HurGetIndexGlobalRF(xx)	# HurGlobalRF contains Sym, whereas xx is Symbol
 		if ind==0
-			push!(tmp.args,:($(esc(xx))=$(esc(symbols(xx))) ))
-			push!(tmp.args, :(push!($(esc(HurGlobalRF)),$(esc(xx))))  )
+			push!(tmp.args,:($(esc(xx))=$(esc(symbols(xx))) ));
+			push!(tmp.args, :(push!($(esc(HurGlobalRF)),$(esc(xx))))  );
 			
-			global HurGlobalDCM=vcat(HurGlobalDCM,[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0])
-			HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]
+			global HurGlobalDCM=vcat(HurGlobalDCM,[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0]);
+			HurGlobalDCM[1,:]=[1.0 0.0 0.0 0.0 1.0 0.0 0.0 0.0 1.0];
 
-			global HurGlobalListTriads=vcat(HurGlobalListTriads,[n1 n2 n3])
-			n,=size(HurGlobalListTriads)
+			global push!(HurGlobalAngularVel,0);
+
+			global HurGlobalListTriads=vcat(HurGlobalListTriads,[n1 n2 n3]);
+			n,=size(HurGlobalListTriads);
 			for i=1:3
-				tempp=string(xx)*string(i)
-				temp=Symbol(tempp)
-				push!(tmp.args,:($(esc(temp))=$(esc(symbols(temp)))))
-				HurGlobalListTriads[n-1,i]=Sym(tempp)
+				tempp=string(xx)*string(i);
+				temp=Symbol(tempp);
+				push!(tmp.args,:($(esc(temp))=$(esc(symbols(temp)))));
+				HurGlobalListTriads[n-1,i]=Sym(tempp);
 			end
 		end
 	end
@@ -93,8 +98,8 @@ macro HurDefineGeneralizedCoordinates(x...) # ... is the way to handle tuples in
 	tmp=Expr(:block)
 	for xx in x
 		# avoid redefinition of RFs
-		push!(tmp.args,:($(esc(xx))=$(esc(SymFunction(string(xx)))) ))
-		push!(tmp.args, :(push!($(esc(HurGlobalGeneralizedCoordinates)),$(esc(xx))))  )
+		push!(tmp.args,:($(esc(xx))=$(esc(SymFunction(string(xx)))) ));
+		push!(tmp.args, :(push!($(esc(HurGlobalGeneralizedCoordinates)),$(esc(xx)))) );
 		
 		# HurGlobalGeneralizedCoordinates=gcs;
 		# HurGlobalELEquation=Table[0,{i,ngcs}];
@@ -136,27 +141,41 @@ function HurTranspose(mat)
 end
 
 function HurDefineDCM(rf, dcm)
-	HurDefineDCMRelative(rf, HurGlobalRF[1], dcm)	
+	HurDefineDCMRelative(rf, HurGlobalRF[1], dcm);	
 end
 
 function HurDefineDCMRelative(rf1, rf2, dcm)
-	rot=HurMatrix2Row(HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:])*dcm)
-	HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]=[simplify(rot[1]) simplify(rot[2]) simplify(rot[3]) simplify(rot[4]) simplify(rot[5]) simplify(rot[6]) simplify(rot[7]) simplify(rot[8]) simplify(rot[9])]
+	rot=HurMatrix2Row(HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:])*dcm);
+	HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]=[simplify(rot[1]) simplify(rot[2]) simplify(rot[3]) simplify(rot[4]) simplify(rot[5]) simplify(rot[6]) simplify(rot[7]) simplify(rot[8]) simplify(rot[9])];
 end
 
 function HurConstructTriadsConversion()
-	n=length(HurGlobalRF)
-	global HurGlobalTriadsConversion=Array{Pair{Sym,Sym}}(undef,n,n*3)
+	n=length(HurGlobalRF);
+	global HurGlobalTriadsConversion=Array{Pair{Sym,Sym}}(undef,n,n*3);
 	
 	for i=1:n
 		for j=1:n
-			Rot=HurUnifyTriadPool(HurGlobalRF[i], HurGlobalRF[j])
+			Rot=HurUnifyTriadPool(HurGlobalRF[i], HurGlobalRF[j]);
 			# tuple((temp[i] for i=1:3)...)
-			tmpTriads=Rot*HurGlobalListTriads[i,:]
-			HurGlobalTriadsConversion[i,3*(j-1)+1]=HurGlobalListTriads[j,1]=>tmpTriads[1]
-			HurGlobalTriadsConversion[i,3*(j-1)+2]=HurGlobalListTriads[j,2]=>tmpTriads[2]
-			HurGlobalTriadsConversion[i,3*(j-1)+3]=HurGlobalListTriads[j,3]=>tmpTriads[3]
+			tmpTriads=Rot*HurGlobalListTriads[i,:];
+			HurGlobalTriadsConversion[i,3*(j-1)+1]=HurGlobalListTriads[j,1]=>tmpTriads[1];
+			HurGlobalTriadsConversion[i,3*(j-1)+2]=HurGlobalListTriads[j,2]=>tmpTriads[2];
+			HurGlobalTriadsConversion[i,3*(j-1)+3]=HurGlobalListTriads[j,3]=>tmpTriads[3];
 		end
+	end
+	m,=size(HurGlobalListTriads)
+	if m>n
+		HurGlobalListTriads=HurGlobalListTriads[setdiff(1:end,m),:]
+	end
+
+	m,=size(HurGlobalDCM)
+	if m>n
+		HurGlobalDCM=HurGlobalDCM[setdiff(1:end,m),:]
+	end
+
+	m,=size(HurGlobalAngularVel)
+	if m>n
+		HurGlobalAngularVel=HurGlobalAngularVel[setdiff(1:end,m)]
 	end
 end
 
@@ -164,54 +183,123 @@ function HurRotationMatrix(ang,dir)
 	dirv=findall(x->x!=0,dir)
 	if length(dirv)==1 # simple rotation
 		if dirv[1]==1 # rotation about x axis
-			rot=[1.0 0.0 0.0;0.0 cos(ang) -sin(ang);0.0 sin(ang) cos(ang)]
+			rot=[1.0 0.0 0.0;0.0 cos(ang) -sin(ang);0.0 sin(ang) cos(ang)];
 		elseif dirv[1]==2 # rotation about y axis
-			rot=[cos(ang) 0.0 sin(ang);0.0 1.0 0.0;-sin(ang) 0.0 cos(ang)]
+			rot=[cos(ang) 0.0 sin(ang);0.0 1.0 0.0;-sin(ang) 0.0 cos(ang)];
 		else # rotation about z axis
-			rot=[cos(ang) -sin(ang) 0.0;sin(ang) cos(ang) 0.0;0.0 0.0 1.0]
+			rot=[cos(ang) -sin(ang) 0.0;sin(ang) cos(ang) 0.0;0.0 0.0 1.0];
 		end
 	else
-		rot=[1.0 0.0 0.0;0.0 1.0 0.0;0.0 0.0 1.0]
+		rot=[1.0 0.0 0.0;0.0 1.0 0.0;0.0 0.0 1.0];
 	end
-	return rot
+	return rot;
 end
 	
-
-
 function HurRow2Matrix(v)
-	return [v[1] v[2] v[3];v[4] v[5] v[6];v[7] v[8] v[9]]
+	return [v[1] v[2] v[3];v[4] v[5] v[6];v[7] v[8] v[9]];
 end
 
 function HurMatrix2Row(Mat)
-	return [Mat[1,1] Mat[1,2] Mat[1,3] Mat[2,1] Mat[2,2] Mat[2,3] Mat[3,1] Mat[3,2] Mat[3,3]] #reshape(Mat',1,:)
+	return [Mat[1,1] Mat[1,2] Mat[1,3] Mat[2,1] Mat[2,2] Mat[2,3] Mat[3,1] Mat[3,2] Mat[3,3]]; #reshape(Mat',1,:)
 end
 
 function HurMakeSymmetricMatrix(v)
-	return [v[1] v[2] v[3];v[2] v[4] v[5];v[3] v[5] v[6]]
+	return [v[1] v[2] v[3];v[2] v[4] v[5];v[3] v[5] v[6]];
 end
 
 function HurUnifyTriadPool(rf1, rf2)
-	rot1=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1),:])
-	rot2=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:])
-	return HurTranspose(rot2)*rot1
+	rot1=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]);
+	rot2=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:]);
+	return HurTranspose(rot2)*rot1;
 end
 
 function HurUnifyTriads(v,rf)
-	n=length(HurGlobalRF)
-	temp= v((HurGlobalTriadsConversion[HurGetIndexGlobalRF(rf),i] for i=1:3*n)...)	
-	coef1=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),1])
-	coef2=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),2])
-	coef3=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),3])
-	return coef1*HurGlobalListTriads[HurGetIndexGlobalRF(rf),1]+coef2*HurGlobalListTriads[HurGetIndexGlobalRF(rf),2]+coef3*HurGlobalListTriads[HurGetIndexGlobalRF(rf),3]
+	n=length(HurGlobalRF);
+	temp= v((HurGlobalTriadsConversion[HurGetIndexGlobalRF(rf),i] for i=1:3*n)...);	
+	coef1=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),1]);
+	coef2=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),2]);
+	coef3=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),3]);
+	return coef1*HurGlobalListTriads[HurGetIndexGlobalRF(rf),1]+coef2*HurGlobalListTriads[HurGetIndexGlobalRF(rf),2]+coef3*HurGlobalListTriads[HurGetIndexGlobalRF(rf),3];
+end
+
+function HurUnifyTriadsCoord(v,rf)
+	n=length(HurGlobalRF);
+	temp= v((HurGlobalTriadsConversion[HurGetIndexGlobalRF(rf),i] for i=1:3*n)...);	
+	coef1=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),1]);
+	coef2=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),2]);
+	coef3=diff(temp,HurGlobalListTriads[HurGetIndexGlobalRF(rf),3]);
+	return [coef1,coef2,coef3,rf];
 end
 
 function HurGetRelativeDCM(rf1,rf2)
-	rot1=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1),:])
-	rot2=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:])
+	rot1=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1),:]);
+	rot2=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf2),:]);
 	r=HurTranspose(rot2)*rot1;
-	return [simplify(r[1,1]) simplify(r[1,2]) simplify(r[1,3]);simplify(r[2,1]) simplify(r[2,2]) simplify(r[2,3]);simplify(r[3,1]) simplify(r[3,2]) simplify(r[3,3]);]
+	return [simplify(r[1,1]) simplify(r[1,2]) simplify(r[1,3]);simplify(r[2,1]) simplify(r[2,2]) simplify(r[2,3]);simplify(r[3,1]) simplify(r[3,2]) simplify(r[3,3])];
 end
 
-function HurDiff()	# for testing only
-	diff(HurGlobalDCM[3,1],HurGlobalTime)
+function HurDiff(mat,var)	# for testing only
+	n,m=size(mat)
+	matp=typeof(mat)(undef,m,n)
+	for i=1:n
+		for j=1:n
+			matp[i,j]=diff(mat[i,j],var)
+		end
+	end
+	return matp
+end
+
+function HurSimplify(mat)	# for testing only
+	n,m=size(mat)
+	matp=typeof(mat)(undef,m,n)
+	for i=1:n
+		for j=1:n
+			matp[i,j]=simplify(mat[i,j])
+		end
+	end
+	return matp
+end
+
+function HurGetAngularVel(rf1,rf2)
+	rot5=HurRow2Matrix(HurGlobalDCM[HurGetIndexGlobalRF(rf1)]);
+	Sw=HurDiff(rot5, HurGlobalTime)*HurTranspose(rot5);
+	ww=(-Sw[2,3])*HurGlobalListTriads[1,1]+(Sw[1,3])*HurGlobalListTriads[1,2]+(-Sw[1,2])*HurGlobalListTriads[1,3];
+	ww=HurSimplify(ww);
+	www=HurUnifyTriads(ww,rf2);
+	HurSetAngularVel(rf1,www);
+	return www;
+end
+
+function HurSetAngularVel(rf,w)
+	HurGlobalAngularVel[HurGetIndexGlobalRF(rf)]=w;
+end
+
+function HurCrossCoord(v1, v2, rf)
+	temp=cross(HurUnifyTriadsCoord(v1,rf)[1:3],HurUnifyTriadsCoord(v2,rf)[1:3]);
+	temp=HurSimplify(temp)
+	return HurAppendRF2Coord(temp,rf)
+end
+
+function HurAppendRF2Coord(coord, rf)
+	push!(coord,rf);
+	return coord;
+end
+
+function HurVectorDiff(v,rf1,rf2)
+	df2dvdt=diff(HurUnifyTriadsCoord[1:3],HurGlobalTime)
+	www=HurUnifyTriads(HurGetAngularVel(rf2,rf2)-HurGetAngularVel(rf1,rf2),rf2);
+	wcrossv=HurCrossCoord(www,v,rf2);
+	df1dvdt=df2dvdt+wcrossv[1:3];
+	df1dvdt=HurSimplify(df1dvdt);
+	return HurCoordTriads[HurAppendRF2Coord[df1dvdt1,rf2]];
+end
+
+function HurCoordTriads(v...)
+	n=length(v)
+	if n==1
+		vec=sum(v[1:3].*HurGlobalListTriads[HurGetIndexGlobalRF(v[4])]);
+	elseif n==2
+		vec=sum(v[1].*HurGlobalListTriads[HurGetIndexGlobalRF(v[2])]);
+	end
+	return vec;
 end
