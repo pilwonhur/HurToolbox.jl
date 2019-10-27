@@ -301,8 +301,8 @@ function HurVectorDiff(v,rf1,rf2)
 	wcrossv=HurCrossCoord(www,v,rf2);
 	df1dvdt=df2dvdt+wcrossv[1:3];
 	df1dvdt=HurSimplify(df1dvdt);
-	# return HurCoordTriads(HurAppendRF2Coord(df1dvdt,rf2));
-	return df1dvdt
+	return HurCoordTriads(HurAppendRF2Coord(df1dvdt,rf2));
+	# return df1dvdt
 end
 
 function HurCoordTriads(v...)
