@@ -254,7 +254,9 @@ function HurSimplify(mat)	# for testing only
 	matp=copy(mat)
 	n=length(mat)
 	for i=1:n
-		matp[i]=simplify(mat[i])
+		if typeof(mat[i]) == Sym
+			matp[i]=simplify(mat[i])
+		end
 	end
 	return matp
 end
