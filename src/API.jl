@@ -242,12 +242,10 @@ function HurGetRelativeDCM(rf1,rf2)
 end
 
 function HurDiff(mat,var)	# for testing only
-	n,m=size(mat)
-	matp=typeof(mat)(undef,m,n)
+	matp=copy(mat)
+	n=length(mat)
 	for i=1:n
-		for j=1:n
-			matp[i,j]=diff(mat[i,j],var)
-		end
+		matp[i]=diff(mat[i],var)
 	end
 	return matp
 end
