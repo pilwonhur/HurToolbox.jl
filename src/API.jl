@@ -1,3 +1,31 @@
+# Due to programming difference, procedure used in Mathematica cannot be used in
+# Julia. So, there are a slight differences.
+# First, newtonian reference frame "n" should be defined manually.
+# Also, time "t" should be defined manually.
+# Finally, I have to run HurConstructTriadsConversion() to explicitely generate 
+# the triads conversion table.
+
+# Other miscellaneous things: [] -> () in functions.
+# No direct access to the global variables. Ex) HurToolbox.HurGlobalRF 
+
+#=
+Version History
+v0.2
+
+
+v0.1 (10/26/2019)
+Basic implementation of definitions of RF, GC, time, DCM, Conversion between triads.
+These are enough for manual usage of toolbox for derivation of dynamics EOM 
+
+@HurDefineRF,@HurDefineGeneralizedCoordinates,@HurDefineTime,HurGetIndexGlobalRF,
+HurFindIndex,HurTranspose,HurDefineDCM,HurDefineDCMRelative,HurConstructTriadsConversion,
+HurRotationMatrix,HurRow2Matrix,HurMatrix2Row,HurMakeSymmetricMatrix,HurUnifyTriadPool,
+HurUnifyTriads,HurGetRelativeDCM,HurDiff
+
+=#
+
+
+
 HurGlobalTime = Sym(undef)
 HurGlobalRF = Array{Sym}(undef,0)
 HurGlobalGeneralizedCoordinates = Array{SymFunction}(undef,0)
@@ -184,6 +212,6 @@ function HurGetRelativeDCM(rf1,rf2)
 	return [simplify(r[1,1]) simplify(r[1,2]) simplify(r[1,3]);simplify(r[2,1]) simplify(r[2,2]) simplify(r[2,3]);simplify(r[3,1]) simplify(r[3,2]) simplify(r[3,3]);]
 end
 
-function HurDiff()
-	diff(HurGlobalDCM[3,1],HurGlobalTime[2])
+function HurDiff()	# for testing only
+	diff(HurGlobalDCM[3,1],HurGlobalTime)
 end
