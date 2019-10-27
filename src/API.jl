@@ -308,9 +308,9 @@ end
 function HurCoordTriads(v...)
 	n=length(v)
 	if n==1
-		vec=sum(v[1:3].*HurGlobalListTriads[HurGetIndexGlobalRF(v[4]),:]);
+		vec=sum(v[1][1:3].*HurGlobalListTriads[HurGetIndexGlobalRF(v[1][4]),:]);
 	elseif n==2
-		vec=sum(v[1].*HurGlobalListTriads[HurGetIndexGlobalRF(v[2]),:]);
+		vec=sum(v[1][:].*HurGlobalListTriads[HurGetIndexGlobalRF(v[2]),:]);
 	end
 	return vec;
 end
