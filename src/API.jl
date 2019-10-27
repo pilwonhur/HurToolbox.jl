@@ -251,12 +251,10 @@ function HurDiff(mat,var)	# for testing only
 end
 
 function HurSimplify(mat)	# for testing only
-	n,m=size(mat)
-	matp=typeof(mat)(undef,m,n)
+	matp=copy(mat)
+	n=length(mat)
 	for i=1:n
-		for j=1:n
-			matp[i,j]=simplify(mat[i,j])
-		end
+		matp[i]=simplify(mat[i])
 	end
 	return matp
 end
