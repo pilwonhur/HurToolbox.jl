@@ -184,3 +184,6 @@ function HurGetRelativeDCM(rf1,rf2)
 	return [simplify(r[1,1]) simplify(r[1,2]) simplify(r[1,3]);simplify(r[2,1]) simplify(r[2,2]) simplify(r[2,3]);simplify(r[3,1]) simplify(r[3,2]) simplify(r[3,3]);]
 end
 
+function HurDiff()
+	diff(HurGlobalDCM[3,1],HurGlobalTime[2])
+end

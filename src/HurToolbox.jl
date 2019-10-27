@@ -29,7 +29,8 @@ export	@HurDefineRF,
 		HurMakeSymmetricMatrix,
 		HurUnifyTriadPool,
 		HurUnifyTriads,
-		HurGetRelativeDCM
+		HurGetRelativeDCM,
+		HurDiff
 
 include("API.jl")
 
