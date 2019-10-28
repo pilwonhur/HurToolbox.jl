@@ -38,6 +38,8 @@ HurGlobalAngularVel=Array{Sym}(undef,1)
 HurGlobalSimplify = false
 HurGlobalELEquation=Array{Sym}(undef,1)
 HurGlobalMMatrix = Array{Sym}(undef,0,0)
+HurGlobalCMatrix = Array{Sym}(undef,0,0)
+HurGlobalGVector = Array{Sym}(undef,0)
 
 # push!(HurGlobalRF,n)
 HurGlobalListTriads[1,:]=[n1 n2 n3];
@@ -110,8 +112,10 @@ macro HurDefineGeneralizedCoordinates(x...) # ... is the way to handle tuples in
  		# HurGlobalNonConservativeForces=Table[0,{i,ngcs}];
   		# HurGlobalConstrainedELEquation=Table[0,{i,ngcs}];			
 	end
-	global HurGlobalELEquation=Array{Sym}(undef,n)
+	global HurGlobalELEquation = Array{Sym}(undef,n)
 	global HurGlobalMMatrix = Array{Sym}(undef,n,n)
+	global HurGlobalCMatrix = Array{Sym}(undef,n,n)
+	global HurGlobalGVector = Array{Sym}(undef,n)
 	# push!(tmp.args, :(print(length($(esc(HurGlobalRF))))  ))
 	return tmp;
 end
@@ -366,7 +370,25 @@ function HurGetMMatrix()
 	return HurGlobalMMatrix
 end
 
+function HurGetCMatrix()
+	gcs=HurGlobalGeneralizedCoordinates
+	ti=HurGlobalTime
+	n=length(gcs);
+	global HurGlobalCMatrix
+	for k=1:n
+		for j=1:n
+			HurGlobalCMatrix[k,j]=[1/2*(diff(HurGlobalMMatrix[k,j], gcs[i](ti))+diff(HurGlobalMMatrix[k,i], gcs[j](ti))-diff(HurGlobalMMatrix[i,j], gcs[k](ti)))*diff(gcs[i](ti),ti) for i=1:n]
+		end
+	end
+	return HurGlobalCMatrix
+end
 
+function HurGetGVector()
+	gcs=HurGlobalGeneralizedCoordinates
+	ti=HurGlobalTime
+	n=length(gcs);
+	HurGlobalGVector=[diff(sum(HurGlobalPotentialE),gcs[i](ti)) for i=1:n]
+end
 
 
 
