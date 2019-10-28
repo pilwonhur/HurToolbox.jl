@@ -36,6 +36,8 @@ HurGlobalTriadsConversion = Array{Pair{Sym,Sym}}(undef,0,0)
 HurGlobalDCM = Array{Sym}(undef,1,9)
 HurGlobalAngularVel=Array{Sym}(undef,1)
 HurGlobalSimplify = false
+HurGlobalELEquation=Array{Sym}(undef,1)
+HurGlobalMMatrix = Array{Sym}(undef,0,0)
 
 # push!(HurGlobalRF,n)
 HurGlobalListTriads[1,:]=[n1 n2 n3];
@@ -97,6 +99,7 @@ end
 
 macro HurDefineGeneralizedCoordinates(x...) # ... is the way to handle tuples in the argument.
 	tmp=Expr(:block)
+	n=length(x)
 	for xx in x
 		# avoid redefinition of RFs
 		push!(tmp.args,:($(esc(xx))=$(esc(SymFunction(string(xx)))) ));
@@ -107,6 +110,8 @@ macro HurDefineGeneralizedCoordinates(x...) # ... is the way to handle tuples in
  		# HurGlobalNonConservativeForces=Table[0,{i,ngcs}];
   		# HurGlobalConstrainedELEquation=Table[0,{i,ngcs}];			
 	end
+	global HurGlobalELEquation=Array{Sym}(undef,n)
+	global HurGlobalMMatrix = Array{Sym}(undef,n,n)
 	# push!(tmp.args, :(print(length($(esc(HurGlobalRF))))  ))
 	return tmp;
 end
@@ -348,4 +353,21 @@ end
 function HurSetSimplify(flag)
 	global HurGlobalSimplify=flag
 end
+
+function HurGetMMatrix()
+	n=length(HurGlobalGeneralizedCoordinates);
+	global HurGlobalMMatrix
+	for i=1:n
+		for j=1:n
+			qdd=diff(HurGlobalGeneralizedCoordinates[j](HurGlobalTime),HurGlobalTime,HurGlobalTime);
+			HurGlobalMMatrix[i,j]=diff(HurGlobalELEquation[i],qdd);
+		end
+	end
+	return HurGlobalMMatrix
+end
+
+
+
+
+
 
