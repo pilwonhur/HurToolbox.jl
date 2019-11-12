@@ -1,6 +1,6 @@
 # Due to programming difference, procedure used in Mathematica cannot be used in
 # Julia. So, there are a slight differences.
-# First, newtonian reference frame "n" should be defined manually.
+# First, Newtonian reference frame "n" should be defined manually.
 # Also, time "t" should be defined manually.
 # Finally, I have to run HurConstructTriadsConversion() to explicitely generate 
 # the triads conversion table.
@@ -37,9 +37,13 @@ HurGlobalDCM = Array{Sym}(undef,1,9)
 HurGlobalAngularVel=Array{Sym}(undef,1)
 HurGlobalSimplify = false
 HurGlobalELEquation=Array{Sym}(undef,1)
+HurGlobalLagrangian=Array{Sym}(undef,1)
+HurGlobalPotentialE=Array{Sym}(undef,1)
 HurGlobalMMatrix = Array{Sym}(undef,0,0)
 HurGlobalCMatrix = Array{Sym}(undef,0,0)
 HurGlobalGVector = Array{Sym}(undef,0)
+HurGlobalRayleighDissipationE = Array{Sym}(undef,0)
+HurGlobalNonConservativeForces=Array{Sym}(undef,1)
 
 # push!(HurGlobalRF,n)
 HurGlobalListTriads[1,:]=[n1 n2 n3];
@@ -102,6 +106,7 @@ end
 macro HurDefineGeneralizedCoordinates(x...) # ... is the way to handle tuples in the argument.
 	tmp=Expr(:block)
 	n=length(x)
+	m=length(HurGlobalRF)
 	for xx in x
 		# avoid redefinition of RFs
 		push!(tmp.args,:($(esc(xx))=$(esc(SymFunction(string(xx)))) ));
@@ -112,10 +117,15 @@ macro HurDefineGeneralizedCoordinates(x...) # ... is the way to handle tuples in
  		# HurGlobalNonConservativeForces=Table[0,{i,ngcs}];
   		# HurGlobalConstrainedELEquation=Table[0,{i,ngcs}];			
 	end
+
 	global HurGlobalELEquation = Array{Sym}(undef,n)
 	global HurGlobalMMatrix = Array{Sym}(undef,n,n)
 	global HurGlobalCMatrix = Array{Sym}(undef,n,n)
 	global HurGlobalGVector = Array{Sym}(undef,n)
+	global HurGlobalRayleighDissipationE = Array{Sym}(undef,n)
+	global HurGlobalLagrangian = Array{Sym}(undef,n)
+	global HurGlobalNonConservativeForces = Array{Sym}(undef,n)
+	global HurGlobalPotentialE = Array{Sym}(undef,n)
 	# push!(tmp.args, :(print(length($(esc(HurGlobalRF))))  ))
 	return tmp;
 end
@@ -191,7 +201,12 @@ function HurConstructTriadsConversion()
 	if m>n
 		HurGlobalDCM=HurGlobalDCM[setdiff(1:end,m),:]
 	end
-
+	m,=size(HurGlobalGeneralizedCoordinates)
+	[HurGlobalLagrangian[i]=0 for i=1:m]
+	[HurGlobalRayleighDissipationE[i]=0 for i=1:m]
+	[HurGlobalNonConservativeForces[i]=0 for i=1:m]
+	[HurGlobalPotentialE[i]=0 for i=1:m]
+	
 	# m,=size(HurGlobalAngularVel)
 	# if m>n
 	# 	HurGlobalAngularVel=HurGlobalAngularVel[setdiff(1:end,m)]
@@ -377,7 +392,7 @@ function HurGetCMatrix()
 	global HurGlobalCMatrix
 	for k=1:n
 		for j=1:n
-			HurGlobalCMatrix[k,j]=[1/2*(diff(HurGlobalMMatrix[k,j], gcs[i](ti))+diff(HurGlobalMMatrix[k,i], gcs[j](ti))-diff(HurGlobalMMatrix[i,j], gcs[k](ti)))*diff(gcs[i](ti),ti) for i=1:n]
+			HurGlobalCMatrix[k,j]=sum([1/2*(diff(HurGlobalMMatrix[k,j], gcs[i](ti))+diff(HurGlobalMMatrix[k,i], gcs[j](ti))-diff(HurGlobalMMatrix[i,j], gcs[k](ti)))*diff(gcs[i](ti),ti) for i=1:n])
 		end
 	end
 	return HurGlobalCMatrix
@@ -388,6 +403,33 @@ function HurGetGVector()
 	ti=HurGlobalTime
 	n=length(gcs);
 	HurGlobalGVector=[diff(sum(HurGlobalPotentialE),gcs[i](ti)) for i=1:n]
+end
+
+function HurGetELEquationFromLagrangian()
+	gcs=HurGlobalGeneralizedCoordinates;
+	ngcs=length(gcs);
+	ti=HurGlobalTime
+	L=sum(HurGlobalLagrangian);
+	DE=sum(HurGlobalRayleighDissipationE);
+	for i=1:ngcs
+		global HurGlobalELEquation[i]=diff(diff(L,diff(gcs[i](ti),ti)),ti)-diff(L,gcs[i](ti))+diff(DE,diff(gcs[i](ti),ti))-HurGlobalNonConservativeForces[i];
+	end
+	return HurGlobalELEquation;
+end
+
+function HurSetLagrangian(L,rf)
+	global HurGlobalLagrangian
+	HurGlobalLagrangian[HurGetIndexGlobalRF(rf)]=L
+end
+
+function HurDefineNonConservativeForces(f...)
+	n=length(f)
+	m,=size(HurGlobalGeneralizedCoordinates)
+	if n!=m
+		error("The number of nonconservative forces you entered is not the same as the number of generalized coordinates!")
+	end
+	global HurGlobalNonConservativeForces
+	[HurGlobalNonConservativeForces[i]=f[i] for i=1:n]
 end
 
 

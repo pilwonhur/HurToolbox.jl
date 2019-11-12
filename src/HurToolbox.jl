@@ -45,7 +45,10 @@ export	@HurDefineRF,
 		HurMatrixVectorProductTriads,
 		HurGetMMatrix,
 		HurGetCMatrix,
-		HurGetGVector
+		HurGetGVector,
+		HurSetLagrangian,
+		HurGetELEquationFromLagrangian,
+		HurDefineNonConservativeForces
 
 include("API.jl")
 
