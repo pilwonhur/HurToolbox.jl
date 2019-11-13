@@ -35,6 +35,7 @@ HurGlobalListTriads = Array{Sym}(undef,1,3)
 HurGlobalTriadsConversion = Array{Pair{Sym,Sym}}(undef,0,0)
 HurGlobalDCM = Array{Sym}(undef,1,9)
 HurGlobalAngularVel=Array{Sym}(undef,1)
+HurGlobalAngularAcc=Array{Sym}(undef,1)
 HurGlobalSimplify = false
 HurGlobalELEquation=Array{Sym}(undef,1)
 HurGlobalLagrangian=Array{Sym}(undef,1)
@@ -44,6 +45,9 @@ HurGlobalCMatrix = Array{Sym}(undef,0,0)
 HurGlobalGVector = Array{Sym}(undef,0)
 HurGlobalRayleighDissipationE = Array{Sym}(undef,0)
 HurGlobalNonConservativeForces=Array{Sym}(undef,1)
+HurGlobalCOMPos = Array{Sym}(undef,0)
+HurGlobalCOMVel	= Array{Sym}(undef,0)
+HurGlobalCOMAcc = Array{Sym}(undef,0)
 
 # push!(HurGlobalRF,n)
 HurGlobalListTriads[1,:]=[n1 n2 n3];
@@ -126,6 +130,10 @@ macro HurDefineGeneralizedCoordinates(x...) # ... is the way to handle tuples in
 	global HurGlobalLagrangian = Array{Sym}(undef,n)
 	global HurGlobalNonConservativeForces = Array{Sym}(undef,n)
 	global HurGlobalPotentialE = Array{Sym}(undef,n)
+	global HurGlobalCOMPos = Array{Sym}(undef,m)
+	global HurGlobalCOMVel = Array{Sym}(undef,m)
+	global HurGlobalCOMAcc = Array{Sym}(undef,m)
+	
 	# push!(tmp.args, :(print(length($(esc(HurGlobalRF))))  ))
 	return tmp;
 end
@@ -198,14 +206,28 @@ function HurConstructTriadsConversion()
 	end
 
 	m,=size(HurGlobalDCM)
+	k,=size(HurGlobalGeneralizedCoordinates)
 	if m>n
 		HurGlobalDCM=HurGlobalDCM[setdiff(1:end,m),:]
 	end
 	m,=size(HurGlobalGeneralizedCoordinates)
-	[HurGlobalLagrangian[i]=0 for i=1:m]
-	[HurGlobalRayleighDissipationE[i]=0 for i=1:m]
-	[HurGlobalNonConservativeForces[i]=0 for i=1:m]
-	[HurGlobalPotentialE[i]=0 for i=1:m]
+	global HurGlobalLagrangian
+	[HurGlobalLagrangian[i]=0 for i=1:k]
+	global HurGlobalRayleighDissipationE
+	[HurGlobalRayleighDissipationE[i]=0 for i=1:k]
+	global HurGlobalNonConservativeForces
+	[HurGlobalNonConservativeForces[i]=0 for i=1:k]
+	global HurGlobalPotentialE
+	[HurGlobalPotentialE[i]=0 for i=1:k]
+	global HurGlobalCOMPos
+	[HurGlobalCOMPos[i]=0 for i=1:m]
+	global HurGlobalCOMVel
+	[HurGlobalCOMVel[i]=0 for i=1:m]
+	global HurGlobalCOMAcc
+	[HurGlobalCOMAcc[i]=0 for i=1:m]
+	global HurGlobalAngularAcc
+	[HurGlobalAngularAcc[i]=0 for i=1:n]
+
 	
 	# m,=size(HurGlobalAngularVel)
 	# if m>n
@@ -317,8 +339,22 @@ function HurGetAngularVel(rf1,rf2)
 	return www;
 end
 
+function HurGetAngularAcc(rf1,rf2)
+	alpha=HurVectorDiff( HurGlobalAngularVel[HurGetIndexGlobalRF(rf1)], HurGlobalRF[1],rf2)
+	# alpha=HurUnifyTriads(HurCoordTriads(HurAppendRF2Coord[D[HurUnifyTriadsCoord[HurGetAngularVel[rf1,HurGlobalRF[[1]] ],HurGlobalRF[[1]] ][[1;;3]],Global`t],HurGlobalRF[[1]] ] ),rf2)
+	# alpha1=If[HurGlobalSimplify, Simplify[alpha], alpha];
+  	HurSetAngularAcc(rf1,alpha)
+  	alpha1
+end
+  
 function HurSetAngularVel(rf,w)
+	global HurGlobalAngularVel
 	HurGlobalAngularVel[HurGetIndexGlobalRF(rf)]=w;
+end
+
+function HurSetAngularAcc(rf,alpha)
+	global HurGlobalAngularAcc
+	HurGlobalAngularAcc[HurGetIndexGlobalRF(rf)] = alpha;
 end
 
 function HurCrossCoord(v1, v2, rf)
@@ -432,6 +468,48 @@ function HurDefineNonConservativeForces(f...)
 	[HurGlobalNonConservativeForces[i]=f[i] for i=1:n]
 end
 
+function HurDefineCOMPos(rf,v)
+	global HurGlobalCOMPos
+	HurGlobalCOMPos[HurGetIndexGlobalRF(rf)] = v
+end
 
+function HurGetNumGlobalRF()
+	return length(HurGlobalRF)
+end
 
+function HurKinematics()
+	nrfs=HurGetNumGlobalRF()
+	if nrfs==1
+		error("There is only one reference frame!")
+	else
+		for i in 2:nrfs
+			HurGetAngularVel(HurGlobalRF[i] , HurGlobalRF[i])
+			HurGetAngularAcc(HurGlobalRF[i] , HurGlobalRF[i])
+			HurGetLinearCOMVel(HurGlobalRF[i] , HurGlobalRF[i])
+			HurGetLinearCOMAcc(HurGlobalRF[i] , HurGlobalRF[i])
+		end
+	end
+end
 
+function HurGetLinearCOMVel(rf1,rf2)
+	v=HurUnifyTriads(HurCoordTriads(HurAppendRF2Coord(diff(HurUnifyTriadsCoord(HurGlobalCOMPos[HurGetIndexGlobalRF(rf1)],HurGlobalRF[1])[1:3],HurGlobalTime),HurGlobalRF[1])),rf2);
+	HurSetCOMVel[rf1,v];
+	return v
+end
+
+function HurSetCOMVel(rf,v)
+	global HurGlobalCOMVel
+	HurGlobalCOMVel[HurGetIndexGlobalRF(rf)] = v
+end
+
+function HurGetLinearCOMAcc(rf1,rf2)
+	acc=HurUnifyTriads(HurCoordTriads(HurAppendRF2Coord(diff(HurUnifyTriadsCoord(HurGlobalCOMPos[HurGetIndexGlobalRF(rf1)],HurGlobalRF[1])[1:3],HurGlobalTime,HurGlobalTime),HurGlobalRF[1])),rf2);	
+	# acc1=If[HurGlobalSimplify, Simplify[acc], acc];
+	HurSetCOMAcc[rf1,acc]
+	return acc
+end
+
+function HurSetCOMAcc(rf,acc)
+	global HurGlobalCOMAcc
+	HurGlobalCOMAcc[HurGetIndexGlobalRF(rf)] = acc
+end

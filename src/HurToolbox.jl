@@ -48,7 +48,17 @@ export	@HurDefineRF,
 		HurGetGVector,
 		HurSetLagrangian,
 		HurGetELEquationFromLagrangian,
-		HurDefineNonConservativeForces
+		HurDefineNonConservativeForces,
+		HurDefineCOMPos,
+		HurGetNumGlobalRF,
+		HurSetAngularAcc,
+		HurGetAngularAcc,
+		HurGetLinearCOMVel,
+		HurSetCOMAcc,
+		HurGetLinearCOMAcc,
+		HurSetCOMVel,
+		HurKinematics
+
 
 include("API.jl")
 
