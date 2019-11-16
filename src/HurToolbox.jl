@@ -14,7 +14,8 @@ using LinearAlgebra, SymPy
 
 @vars n n1 n2 n3 t
 
-export	@HurDefineRF,
+export	@HurInitialize,
+		@HurDefineRF,
 		@HurDefineGeneralizedCoordinates,
 		@HurDefineTime,
 		HurGetIndexGlobalRF,
@@ -57,7 +58,23 @@ export	@HurDefineRF,
 		HurSetCOMAcc,
 		HurGetLinearCOMAcc,
 		HurSetCOMVel,
-		HurKinematics
+		HurKinematics,
+		HurTurnOnSimplify,
+		HurTurnOffSimplify,
+		HurDefineMass,
+		HurDefineInertia,
+		HurDefineVertical,
+		HurGetAngularMomentum,
+		HurGetLinearMomentum,
+		HurGetInertiaTensor,
+		HurELEquation,
+		HurGetLagrangian,
+		HurGetKineticE,
+		HurGetPotentialE,
+		HurDefineOtherPotentialE,
+		HurDefineVariableList,
+		HurELInverse
+
 
 
 include("API.jl")
